@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <sstream>
 #include "indri/RMExpander.hpp"
-#include "indri/RelevanceModel.hpp"
+#include "indri/RandomWalkModel.hpp"
 
 indri::query::RMExpander::RMExpander( indri::api::QueryEnvironment * env , indri::api::Parameters& param ) : indri::query::QueryExpander( env, param ) { }
 
@@ -37,10 +37,10 @@ std::string indri::query::RMExpander::expand( std::string originalQuery , std::v
   // account for phrases then.
   int maxGrams = 1;
   
-  indri::query::RelevanceModel rm(*_env, rmSmoothing, maxGrams, fbDocs);
+  indri::query::RandomWalkModel rm(*_env, rmSmoothing, maxGrams, fbDocs);
   rm.generate( originalQuery, results );
 
-  const std::vector<indri::query::RelevanceModel::Gram*>& grams = rm.getGrams();
+  const std::vector<indri::query::RandomWalkModel::Gram*>& grams = rm.getGrams();
   std::vector< std::pair<std::string, double> > probs;
   // sorted grams came from rm
   for( size_t j=0; j<grams.size(); j++ ) {

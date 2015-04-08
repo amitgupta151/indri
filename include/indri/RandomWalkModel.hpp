@@ -110,7 +110,7 @@ namespace indri {
       void _buildCoocMatrix();
 
 
-      long ** _cooccurMatrix;
+      size_t ** _cooccurMatrix;
 
 
     public:

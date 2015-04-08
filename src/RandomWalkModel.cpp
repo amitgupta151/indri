@@ -137,13 +137,16 @@ void indri::query::RandomWalkModel::_countGrams() {
 
         GramCounts** gramCounts = 0;
         gramCounts = _gramTable.find( &newCounts->gram );
-
+        size_t* curcount = 0;
+	curcount = _gramCounts.find(&newCounts->gram);
         if( gramCounts == 0 ) {
           _gramTable.insert( &newCounts->gram, newCounts );
           _gramCounts.insert(&newCounts->gram,1);
           gramCounts = &newCounts;
         } else {
-        	_gramCounts.insert(&newCounts->gram,1 + (long) _gramCounts.find(&newCounts->gram));
+                if (curcount == 0)
+			fprintf (stderr, "Errrrrror \n");
+        	_gramCounts.insert(&newCounts->gram,1 +  (*curcount));
           delete newCounts;
         }
 
@@ -167,15 +170,23 @@ void indri::query::RandomWalkModel::_countGrams() {
 void indri::query::RandomWalkModel::_buildCoocMatrix() {
 
   // count the number of grams which occur in the dataset at least > limit_count types
+  int errcount = 0;
   size_t limit_count = 5;
   HGramCount::iterator iter_count;
   size_t valid_grams_count = 0;
   for (iter_count = _gramCounts.begin(); iter_count != _gramCounts.end() ; iter_count++)
+        {  fprintf(stderr,"l1 %zu\n", *iter_count->second);
 	  if (*iter_count->second > limit_count) {
+  		fprintf(stderr,"l2\n");
 		  _idGrams.insert(valid_grams_count,*iter_count->first);
-		  _gramIds.insert(*iter_count->first,valid_grams_count);
+				
+  fprintf(stderr,"l3\n");
+  _gramIds.insert(*iter_count->first,valid_grams_count);
 		  valid_grams_count++;
 	  }
+
+  }
+  fprintf(stderr,"h1\n");
 
   // Initialize co-occurrence matrix
   _cooccurMatrix = (size_t**) malloc(valid_grams_count * sizeof(size_t*));
@@ -185,6 +196,7 @@ void indri::query::RandomWalkModel::_buildCoocMatrix() {
     	  _cooccurMatrix[i][j] = 0;
   }
 
+  fprintf(stderr,"h1\n");
   HGram::iterator iter;
 
   for( iter = _gramTable.begin(); iter != _gramTable.end(); iter++ ) {
@@ -210,6 +222,7 @@ void indri::query::RandomWalkModel::_buildCoocMatrix() {
 	  }
   }
 
+  fprintf(stderr,"h1\n");
   for (size_t i = 0; i < valid_grams_count; i++) {
 	 Gram** g1 = _idGrams.find(i);
 	 GramCounts** g1c = _gramTable.find(*g1);
@@ -224,6 +237,7 @@ void indri::query::RandomWalkModel::_buildCoocMatrix() {
 
 
 
+  fprintf(stderr,"h1\n");
   double collectionCount = (double)_environment.termCount();
   indri::query::TermScoreFunction* function = 0;
 
@@ -435,6 +449,7 @@ void indri::query::RandomWalkModel::generate( const std::string& query ) {
     _vectors = _environment.documentVectors( _documentIDs );
 
     _countGrams();
+    fprintf(stderr, "here Amit \n");
     _buildCoocMatrix();
    // _scoreGrams();
     _sortGrams();
@@ -451,14 +466,18 @@ void indri::query::RandomWalkModel::generate( const std::string& query ) {
 
 void indri::query::RandomWalkModel::generate( const std::string& query, const std::vector<indri::api::ScoredExtentResult>& results  ) {
   try {
+    fprintf (stderr, "hey1 \n");
     _results = results;
     _logtoposterior(_results);
     _grams.clear();
     _extractDocuments();
     _vectors = _environment.documentVectors( _documentIDs );
 
+    fprintf(stderr, "here Amit2 \n");
     _countGrams();
-    _buildCoocMatrix();
+ 
+    fprintf(stderr, "here Amit2 \n");
+   _buildCoocMatrix();
  //   _scoreGrams();
     _sortGrams();
     for (unsigned int i = 0; i < _vectors.size(); i++)

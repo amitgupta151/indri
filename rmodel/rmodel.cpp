@@ -23,7 +23,7 @@
 //    ngram -- default is '1' (unigram)
 
 #include "indri/Parameters.hpp"
-#include "indri/RelevanceModel.hpp"
+#include "indri/RandomWalkModel.hpp"
 
 static bool copy_parameters_to_string_vector( std::vector<std::string>& vec, indri::api::Parameters p, const std::string& parameterName ) {
   if( !p.exists(parameterName) )
@@ -60,7 +60,7 @@ static void open_indexes( indri::api::QueryEnvironment& environment, indri::api:
     environment.setScoringRules( smoothingRules );
 }
 
-static void printGrams( const std::string& query, const std::vector<indri::query::RelevanceModel::Gram*>& grams ) {
+static void printGrams( const std::string& query, const std::vector<indri::query::RandomWalkModel::Gram*>& grams ) {
   std::cout << "# query: " << query << std::endl;
   for( size_t j=0; j<grams.size(); j++ ) {
     std::cout << std::setw(15)
@@ -113,10 +113,10 @@ int main( int argc, char** argv ) {
 
     for( size_t i=0; i<parameterQueries.size(); i++ ) {
       std::string query = parameterQueries[i];
-      indri::query::RelevanceModel model( environment, rmSmoothing, maxGrams, documents );
+      indri::query::RandomWalkModel model( environment, rmSmoothing, maxGrams, documents );
       model.generate( query );
 
-      const std::vector<indri::query::RelevanceModel::Gram*>& grams = model.getGrams();
+      const std::vector<indri::query::RandomWalkModel::Gram*>& grams = model.getGrams();
       printGrams( query, grams );
     }
   } catch( lemur::api::Exception& e ) {
