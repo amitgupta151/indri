@@ -117,6 +117,8 @@ namespace indri {
       std::vector<lemur::api::DOCID_T> _documentIDs;
       std::vector<Gram*> _grams;
       std::vector<indri::api::DocumentVector*> _vectors;
+      vector<std::string> indri::query::RandomWalkModel::find_query_grams(std::string ans);
+      vector<std::string> indri::query::RandomWalkModel::tokenize_string(std::string ans);
 
       void _countGrams();
       void _scoreGrams();

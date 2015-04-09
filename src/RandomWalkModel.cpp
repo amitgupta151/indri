@@ -392,12 +392,12 @@ void indri::query::RandomWalkModel::generate( const std::string& query ) {
 // generate
 //
 
-vector<std::string> find_query_grams(std::string ans) {
+vector<std::string> indri::query::RandomWalkModel::find_query_grams(std::string ans) {
 vector<std::string> v  = tokenize_string(ans);
 vector<std::string> ans_vector ;
 
 for ( int i = 0 ; i < v.size(); i++) {
-	for (int j = 1 ; j <= indri::query::RandomWalkModel::_maxGrams; j++) {
+	for (int j = 1 ; j <= _maxGrams; j++) {
 		std::string st = "";
 		for (int k = 0 ; k < j ; k++)
 			if (i+k < v.size())
@@ -417,7 +417,7 @@ for ( int i = 0 ; i < v.size(); i++) {
 
 }
 
-vector<std::string> tokenize_string(std::string ans) {
+vector<std::string> indri::query::RandomWalkModel::tokenize_string(std::string ans) {
 vector<std::string> v ;
 
 while (ans.length() > 0) {
