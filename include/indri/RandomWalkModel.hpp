@@ -102,6 +102,9 @@ namespace indri {
       typedef indri::utility::HashTable< Gram*, size_t, Gram::hash, Gram::string_comparator > HGramCount;
       typedef indri::utility::HashTable< size_t,Gram*  > HCountGram;
 
+      typedef indri::utility::HashTable< Gram*, double, Gram::hash, Gram::string_comparator > HGramScore;
+
+
       std::vector<std::string> _queryGrams;
       // gram table :- hash (gram -> list ( doc_id, count))
       HGram _gramTable;
@@ -112,6 +115,10 @@ namespace indri {
       CountVectorGram _docIdGrams;
       // id gram :- hash (id -> gram)
       HCountGram _idGrams;
+
+       // gram to score
+      HGramScore _gramScores;
+      double total_score_count = 0;
 
       std::vector<indri::api::ScoredExtentResult> _results;
       std::vector<lemur::api::DOCID_T> _documentIDs;
@@ -127,7 +134,7 @@ namespace indri {
       // id , id -> cooccur
       size_t ** _cooccurMatrix;
 
-
+      
     public:
       RandomWalkModel( indri::api::QueryEnvironment& environment,
                       const std::string& smoothing,\

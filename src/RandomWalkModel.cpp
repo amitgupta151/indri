@@ -135,6 +135,18 @@ void indri::query::RandomWalkModel::_countGrams() {
           break;
         }
 
+        std::string gram_text = newCounts->gram.term_string();
+        for (int i = 0 ; i < _queryGrams.size() ; i++) {
+		int m = 0;
+		if (_queryGrams[i].compare(gram_text) == 0) {
+		        total_score_count += 1.0;	
+                        m = 1;	
+			_gramScores.insert(&newCounts->gram,1.0);
+		}
+		if (m == 0) _gramScores.insert(&newCounts->gram,0);
+ 	 }
+
+				
         GramCounts** gramCounts = 0;
         gramCounts = _gramTable.find( &newCounts->gram );
         size_t* curcount = 0;
@@ -459,7 +471,7 @@ void indri::query::RandomWalkModel::generate( const std::string& query, const st
 
     fprintf(stderr, "here Amit2 \n");
    _buildCoocMatrix();
- //   _scoreGrams();
+    _scoreGrams();
     fprintf(stderr, "here Amit3 \n");
     _sortGrams();
     fprintf(stderr, "here Amit4 \n");
