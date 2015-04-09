@@ -25,6 +25,14 @@ namespace indri {
         std::vector<std::string> terms;
         double weight;
 
+        std::string term_string() {
+        	std::string ans = "";
+        	for (int i = 0 ; i < terms.size(); i++) ans += " " + terms[i];
+        	if (ans.length() > 0) return ans.substr(1);
+        	else return ans;
+        }
+
+
         struct hash {
           int operator() ( const Gram* one ) const {
             indri::utility::GenericHash<const char*> h;
@@ -75,7 +83,8 @@ namespace indri {
         };
       };
 
-    private:
+
+     private:
       struct GramCounts {
         Gram gram;
         indri::utility::greedy_vector< std::pair< int, int > > counts;
@@ -93,9 +102,15 @@ namespace indri {
       typedef indri::utility::HashTable< Gram*, size_t, Gram::hash, Gram::string_comparator > HGramCount;
       typedef indri::utility::HashTable< size_t,Gram*  > HCountGram;
 
+      std::vector<std::string> _queryGrams;
+      // gram table :- hash (gram -> list ( doc_id, count))
       HGram _gramTable;
+      // gram counts :- hash (gram -> count)
+      //gram id :- hash (gram -> id)
       HGramCount _gramCounts,_gramIds;
+      // _docIdGrams :- hash (docid -> list (gram , count) )
       CountVectorGram _docIdGrams;
+      // id gram :- hash (id -> gram)
       HCountGram _idGrams;
 
       std::vector<indri::api::ScoredExtentResult> _results;
@@ -109,7 +124,7 @@ namespace indri {
       void _extractDocuments();
       void _buildCoocMatrix();
 
-
+      // id , id -> cooccur
       size_t ** _cooccurMatrix;
 
 

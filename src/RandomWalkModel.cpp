@@ -237,79 +237,7 @@ void indri::query::RandomWalkModel::_buildCoocMatrix() {
 
 
 
-  fprintf(stderr,"h1\n");
-  double collectionCount = (double)_environment.termCount();
-  indri::query::TermScoreFunction* function = 0;
 
-  // for each gram we've seen
-  for( iter = _gramTable.begin(); iter != _gramTable.end(); iter++ ) {
-    // gather the number of times this gram occurs in the collection
-    double gramCount = 0;
-
-    Gram* gram = *iter->first;
-    GramCounts* gramCounts = *iter->second;
-
-    if( _smoothing.length() != 0 ) {
-      // it's only important to get background frequencies if
-      // we're smoothing with them; otherwise we don't care.
-
-      if( gram->terms.size() == 1 ) {
-        gramCount = (double)_environment.stemCount( gram->terms[0] );
-      } else {
-        // notice that we're running a query here;
-        // this is likely to be slow. (be warned)
-
-        std::stringstream s;
-        s << "#1( ";
-
-        for( size_t i=0; i< gram->terms.size(); i++ ) {
-          s << " \"" << gram->terms[i] << "\"" << std::endl;
-        }
-
-        s << ") ";
-        gramCount = _environment.expressionCount( s.str() );
-      }
-
-      double gramFrequency = gramCount / collectionCount;
-      //      function = indri::query::TermScoreFunctionFactory::get( _smoothing, gramFrequency );
-      function = indri::query::TermScoreFunctionFactory::get( _smoothing, gramCount, collectionCount, 0 , 0 );
-    }
-
-    // now, aggregate scores for each retrieved item
-    std::vector<indri::api::ScoredExtentResult>::iterator riter;
-    double gramScore = 0;
-    size_t c;
-    size_t r;
-
-    for( r = 0, c = 0; r < _results.size() && c < gramCounts->counts.size(); r++ ) {
-      int contextLength = _results[r].end - _results[r].begin;
-      // has been converted to a posterior probability.
-      double documentScore = _results[r].score;
-      double termScore = 0;
-      double occurrences = 0;
-
-      if( gramCounts->counts[c].first == r ) {
-        // we have counts for this result
-        occurrences = gramCounts->counts[c].second;
-        c++;
-      }
-
-      // determine the score for this term
-      if( function != 0 ) {
-        // log probability here
-        termScore = exp(function->scoreOccurrence( occurrences, contextLength ));
-      } else {
-        termScore = occurrences / double(contextLength);
-      }
-      //RMExpander weights this by 1/fbDocs
-      // Unclear as to why.
-      gramScore += documentScore * termScore;
-      //gramScore += (1.0/_documents) * documentScore * termScore;
-    }
-
-    gram->weight = gramScore;
-    delete function;
-  }
 }
 
 
@@ -464,6 +392,57 @@ void indri::query::RandomWalkModel::generate( const std::string& query ) {
 // generate
 //
 
+vector<std::string> find_query_grams(std::string ans) {
+vector<std::string> v  = tokenize_string(ans);
+vector<std::string> ans_vector ;
+
+for ( int i = 0 ; i < v.size(); i++) {
+	for (int j = 1 ; j <= indri::query::RandomWalkModel::_maxGrams; j++) {
+		std::string st = "";
+		for (int k = 0 ; k < j ; k++)
+			if (i+k < v.size())
+				st += " " + v[i + k];
+			if (st.length() > 1)
+				{
+				ans_vector.push_back(st.substr(1));
+				cout << "query grams " << st.substr(1) << endl;
+				}
+
+
+
+	}
+
+
+}
+
+}
+
+vector<std::string> tokenize_string(std::string ans) {
+vector<std::string> v ;
+
+while (ans.length() > 0) {
+  int l = ans.find (" ");
+  if ( l == -1) {
+   v.push_back(ans);
+   break;
+  }
+  else if (l != 0) {
+   std:string st = ans.substr(0,l);
+   if (st.length() > 0 )
+        v.push_back(st);
+   ans = ans.substr(l);
+    }
+    else {
+
+   ans = ans.substr(1);
+    }
+
+}
+return v;
+}
+
+
+
 void indri::query::RandomWalkModel::generate( const std::string& query, const std::vector<indri::api::ScoredExtentResult>& results  ) {
   try {
     fprintf (stderr, "hey1 \n");
@@ -472,10 +451,10 @@ void indri::query::RandomWalkModel::generate( const std::string& query, const st
     _grams.clear();
     _extractDocuments();
     _vectors = _environment.documentVectors( _documentIDs );
-
+    _queryGrams = find_query_grams(query);
     fprintf(stderr, "here Amit2 \n");
     _countGrams();
- 
+
     fprintf(stderr, "here Amit2 \n");
    _buildCoocMatrix();
  //   _scoreGrams();
