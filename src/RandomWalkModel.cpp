@@ -175,9 +175,9 @@ void indri::query::RandomWalkModel::_buildCoocMatrix() {
   HGramCount::iterator iter_count;
   size_t valid_grams_count = 0;
   for (iter_count = _gramCounts.begin(); iter_count != _gramCounts.end() ; iter_count++)
-        {  fprintf(stderr,"l1 %zu\n", *iter_count->second);
+        {  //fprintf(stderr,"l1 %zu\n", *iter_count->second);
 	  if (*iter_count->second > limit_count) {
-  		fprintf(stderr,"l2\n");
+  //		fprintf(stderr,"l2\n");
 		  _idGrams.insert(valid_grams_count,*iter_count->first);
 				
   fprintf(stderr,"l3\n");
@@ -237,6 +237,7 @@ void indri::query::RandomWalkModel::_buildCoocMatrix() {
 
 
 
+  fprintf(stderr,"hn\n");
 
 }
 
@@ -414,7 +415,8 @@ for ( int i = 0 ; i < v.size(); i++) {
 
 
 }
-
+ fprintf (stderr, "got vector \n");
+ return ans_vector;
 }
 
 vector<std::string> indri::query::RandomWalkModel::tokenize_string(std::string ans) {
@@ -458,9 +460,12 @@ void indri::query::RandomWalkModel::generate( const std::string& query, const st
     fprintf(stderr, "here Amit2 \n");
    _buildCoocMatrix();
  //   _scoreGrams();
+    fprintf(stderr, "here Amit3 \n");
     _sortGrams();
+    fprintf(stderr, "here Amit4 \n");
     for (unsigned int i = 0; i < _vectors.size(); i++)
       delete _vectors[i];
+    fprintf(stderr, "here Amit4 \n");
   } catch( lemur::api::Exception& e ) {
     LEMUR_RETHROW( e, "Couldn't generate relevance model for '" + query + "' because: " );
   }
