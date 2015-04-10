@@ -174,17 +174,18 @@ void indri::query::RandomWalkModel::_buildCoocMatrix() {
    
   // count the number of grams which occur in the dataset at least > limit_count types
   int errcount = 0;
-  size_t limit_count = 5;
+  size_t limit_count = 0;
   HGramCount::iterator iter_count;
   valid_grams_count = 0;
   total_score_count = 0;
+  cout << "gram counts length " << _gramCounts.size() << endl;
   for (iter_count = _gramCounts.begin(); iter_count != _gramCounts.end() ; iter_count++)
-        {  //fprintf(stderr,"l1 %zu\n", *iter_count->second);
+        { // cout << "doc_grams" <<  (*iter_count->first)->term_string() << " " <<  *iter_count->second << endl;
 	  if (*iter_count->second > limit_count) {
   //		fprintf(stderr,"l2\n");
 		 _idGrams.insert(valid_grams_count,*iter_count->first);
 				
-		 fprintf(stderr,"l3\n");
+		// fprintf(stderr,"l3\n");
 		 _gramIds.insert(*iter_count->first,valid_grams_count);
 		 valid_grams_count++;
 		 std::string gram_text = (*iter_count->first)->term_string();
@@ -462,12 +463,19 @@ return v;
 void indri::query::RandomWalkModel::_computePageRank() {
 	HGramScore::iterator iter_score;
           cout << "Sizeee " << _gramScores.size() << endl;
-	  for (iter_score = _gramScores.begin(); iter_score != _gramScores.end() ; iter_score++)
-		  	  _gramScores.insert(*iter_score->first, *iter_score->second / total_score_count);
+	  int count = 0;  
+	for (iter_score = _gramScores.begin(); iter_score != _gramScores.end() ; iter_score++)
+		  	  {
+	count++;
+      cout << "Sizeee " << _gramScores.size() << endl;
+        _gramScores.insert(*iter_score->first , *iter_score->second / total_score_count);
+	cout << count << endl;
+	}
 	  int number_of_iterations = 500;
 	  double lambda = 0.3;
+          cout << "Sizeee2 " << _gramScores.size() << endl;
 	  for (int i = 0 ; i < number_of_iterations; i++) {
-		  if (i%10 == 0) fprintf (stderr, "number of iterations pagerank completed %d\n",i);
+		   fprintf (stderr, "number of iterations pagerank completed %d\n",i);
 		  for (iter_score = _gramScores.begin(); iter_score != _gramScores.end() ; iter_score++) {
 			  double new_score = 0;
 			  double cur_score = *iter_score->second;
@@ -483,6 +491,7 @@ void indri::query::RandomWalkModel::_computePageRank() {
 		  }
 	  }
 
+          cout << "Sizeee3 " << _gramScores.size() << endl;
 
 	  for (iter_score = _gramScores.begin(); iter_score != _gramScores.end() ; iter_score++)
 	  		  	{ cout << "pr scores " << (*iter_score->first)->term_string() << " " << (*iter_score->first)->weight << endl;  
