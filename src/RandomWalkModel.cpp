@@ -135,16 +135,7 @@ void indri::query::RandomWalkModel::_countGrams() {
           break;
         }
 
-        std::string gram_text = newCounts->gram.term_string();
-        for (int i = 0 ; i < _queryGrams.size() ; i++) {
-		int m = 0;
-		if (_queryGrams[i].compare(gram_text) == 0) {
-		        total_score_count += 1.0;	
-                        m = 1;	
-			_gramScores.insert(&newCounts->gram,1.0);
-		}
-		if (m == 0) _gramScores.insert(&newCounts->gram,0);
- 	 }
+
 
 				
         GramCounts** gramCounts = 0;
@@ -185,16 +176,26 @@ void indri::query::RandomWalkModel::_buildCoocMatrix() {
   int errcount = 0;
   size_t limit_count = 5;
   HGramCount::iterator iter_count;
-  size_t valid_grams_count = 0;
+  valid_grams_count = 0;
   for (iter_count = _gramCounts.begin(); iter_count != _gramCounts.end() ; iter_count++)
         {  //fprintf(stderr,"l1 %zu\n", *iter_count->second);
 	  if (*iter_count->second > limit_count) {
   //		fprintf(stderr,"l2\n");
-		  _idGrams.insert(valid_grams_count,*iter_count->first);
+		 _idGrams.insert(valid_grams_count,*iter_count->first);
 				
-  fprintf(stderr,"l3\n");
-  _gramIds.insert(*iter_count->first,valid_grams_count);
-		  valid_grams_count++;
+		 fprintf(stderr,"l3\n");
+		 _gramIds.insert(*iter_count->first,valid_grams_count);
+		 valid_grams_count++;
+		 std::string gram_text = (*iter_count->first)->term_string();
+		 for (int i = 0 ; i < _queryGrams.size() ; i++) {
+		 		int m = 0;
+		 		if (_queryGrams[i].compare(gram_text) == 0) {
+		 		        total_score_count += 1.0;
+		                         m = 1;
+		 			_gramScores.insert((*iter_count->first),1.0);
+		 		}
+		 		if (m == 0) _gramScores.insert((*iter_count->first),0);
+		  	 }
 	  }
 
   }
@@ -455,6 +456,35 @@ while (ans.length() > 0) {
 return v;
 }
 
+void indri::query::RandomWalkModel::_computePageRank() {
+	HGramScore::iterator iter_score;
+	  for (iter_score = _gramScores.begin(); iter_score != _gramCounts.end() ; iter_score++)
+		  	  _gramScores.insert(*iter_score->first, *iter_score->second / total_score_count);
+	  int number_of_iterations = 500;
+	  double lambda = 0.3;
+	  for (int i = 0 ; i < number_of_iterations; i++) {
+		  if (i%10 == 0) fprintf (stderr, "number of iterations pagerank completed %d\n",i);
+		  for (iter_score = _gramScores.begin(); iter_score != _gramCounts.end() ; iter_score++) {
+			  double new_score = 0;
+			  double cur_score = *iter_score->second;
+			  Gram * gm = *iter_score->first;
+			  size_t gid = _gramIds.find(gm);
+			  for (size_t j = 0 ; j < valid_grams_count; j++) {
+				  Gram* gm2 = _idGrams.find(j);
+				  size_t wt = _cooccurMatrix[i][j];
+				  new_score += wt* _gramScores.find(gm2);
+			  }
+			  new_score = lambda * cur_score + (1 - lambda ) * new_score;
+			  _gramScores.insert(gm, new_score);
+		  }
+	  }
+
+
+	  for (iter_score = _gramScores.begin(); iter_score != _gramCounts.end() ; iter_score++)
+	  		  	  (*iter_score->first)->weight = *iter_score->second ;
+
+
+}
 
 
 void indri::query::RandomWalkModel::generate( const std::string& query, const std::vector<indri::api::ScoredExtentResult>& results  ) {
@@ -471,7 +501,8 @@ void indri::query::RandomWalkModel::generate( const std::string& query, const st
 
     fprintf(stderr, "here Amit2 \n");
    _buildCoocMatrix();
-    _scoreGrams();
+   _computePageRank();
+   // _scoreGrams();
     fprintf(stderr, "here Amit3 \n");
     _sortGrams();
     fprintf(stderr, "here Amit4 \n");

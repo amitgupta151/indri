@@ -130,10 +130,10 @@ namespace indri {
       void _sortGrams();
       void _extractDocuments();
       void _buildCoocMatrix();
-
+      void _computePageRank();
       // id , id -> cooccur
       size_t ** _cooccurMatrix;
-
+      size_t valid_grams_count;
       
     public:
       RandomWalkModel( indri::api::QueryEnvironment& environment,
