@@ -118,7 +118,7 @@ namespace indri {
 
        // gram to score
       HGramScore _gramScores;
-      double total_score_count = 0;
+       double total_score_count;
 
       std::vector<indri::api::ScoredExtentResult> _results;
       std::vector<lemur::api::DOCID_T> _documentIDs;
