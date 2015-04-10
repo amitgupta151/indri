@@ -188,15 +188,17 @@ void indri::query::RandomWalkModel::_buildCoocMatrix() {
 		 _gramIds.insert(*iter_count->first,valid_grams_count);
 		 valid_grams_count++;
 		 std::string gram_text = (*iter_count->first)->term_string();
+		 int m = 0;
 		 for (int i = 0 ; i < _queryGrams.size() ; i++) {
-		 		int m = 0;
+
 		 		if (_queryGrams[i].compare(gram_text) == 0) {
-		 		        total_score_count += 1.0;
-		                         m = 1;
-		 			_gramScores.insert((*iter_count->first),1.0);
+		 			    cout << "matched gram " << gram_text << endl;
+		 		        total_score_count += 1.0; m = 1;
+		 			    _gramScores.insert((*iter_count->first),1.0);
 		 		}
-		 		if (m == 0) _gramScores.insert((*iter_count->first),0);
+
 		  	 }
+		 if (m == 0) _gramScores.insert((*iter_count->first),0);
 	  }
 
   }
